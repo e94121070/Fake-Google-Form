@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google 表單風格</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .container { max-width: 600px; margin: 20px auto; }
+        .question { margin-bottom: 15px; }
+        .hidden { display: none; }
+        button { margin-top: 10px; padding: 8px 12px; }
+    </style>
+</head>
+<body>
+    <div class="form container">
+        <div class="title-div">
+            <h1 class="hh">問卷調查</h1>
+            <p class="under">請依序填寫問卷</p>
+        </div>
+        
+        <div id="form-container"></div>
+
+        <button id="prevBtn" onclick="prevPage()" class="hidden btn">上一頁</button>
+        <button id="nextBtn" onclick="nextPage()" class="btn">下一頁</button>
+        <button id="submitBtn" onclick="submitForm()" class="hidden btn">提交</button>
+    </div>
+
+    <script>
+        const formData = {
+            pages: [
+                ["single_choice", "multiple_choice"],
+                ["text", "dropdown"]
+            ],
+            questions: {
+                "single_choice": {
+                    "question": "你的最愛的顏色？",
+                    "options": ["紅", "藍", "綠", "黃"],
+                    "type": "radio"
+                },
+                "multiple_choice": {
+                    "question": "你喜歡哪些水果？",
+                    "options": ["蘋果", "香蕉", "葡萄", "西瓜"],
+                    "type": "checkbox"
+                },
+                "text": {
+                    "question": "請輸入你的姓名",
+                    "type": "text"
+                },
+                "dropdown": {
+                    "question": "請選擇你的國家",
+                    "options": ["台灣", "美國", "日本", "法國"],
+                    "type": "select"
+                }
+            }
+        };
+
+        let currentPage = 0;
+        let answers = {};
+
+        function renderPage() {
+            const container = document.getElementById("form-container");
+            container.innerHTML = "";
+
+            formData.pages[currentPage].forEach(qType => {
+                const questionData = formData.questions[qType];
+                const div = document.createElement("div");
+                div.className = "question name-div";
+                div.innerHTML = `<p class='name'>${questionData.question} <span class='required'>*</span></p>`;
+
+                if (questionData.type === "radio" || questionData.type === "checkbox") {
+                    questionData.options.forEach(option => {
+                        div.innerHTML += `
+                            <label>
+                                <input type="${questionData.type}" name="${qType}" value="${option}"
+                                    ${answers[qType]?.includes(option) ? "checked" : ""}>
+                                ${option}
+                            </label><br>
+                        `;
+                    });
+                } else if (questionData.type === "select") {
+                    let optionsHtml = questionData.options.map(option =>
+                        `<option value="${option}" ${answers[qType] === option ? "selected" : ""}>${option}</option>`
+                    ).join("");
+                    div.innerHTML += `<select name="${qType}">${optionsHtml}</select>`;
+                } else {
+                    div.innerHTML += `<input type="text" name="${qType}" class="input-div" value="${answers[qType] || ""}">`;
+                }
+
+                container.appendChild(div);
+            });
+
+            document.getElementById("prevBtn").classList.toggle("hidden", currentPage === 0);
+            document.getElementById("nextBtn").classList.toggle("hidden", currentPage === formData.pages.length - 1);
+            document.getElementById("submitBtn").classList.toggle("hidden", currentPage !== formData.pages.length - 1);
+        }
+
+        function saveAnswers() {
+            document.querySelectorAll("input, select").forEach(input => {
+                if (input.type === "radio" && input.checked) {
+                    answers[input.name] = input.value;
+                } else if (input.type === "checkbox") {
+                    if (!answers[input.name]) answers[input.name] = [];
+                    if (input.checked && !answers[input.name].includes(input.value)) {
+                        answers[input.name].push(input.value);
+                    } else if (!input.checked) {
+                        answers[input.name] = answers[input.name].filter(val => val !== input.value);
+                    }
+                } else if (input.type === "text" || input.tagName === "SELECT") {
+                    answers[input.name] = input.value;
+                }
+            });
+        }
+
+        function nextPage() {
+            saveAnswers();
+            if (currentPage < formData.pages.length - 1) {
+                currentPage++;
+                renderPage();
+            }
+        }
+
+        function prevPage() {
+            saveAnswers();
+            if (currentPage > 0) {
+                currentPage--;
+                renderPage();
+            }
+        }
+
+        function submitForm() {
+            saveAnswers();
+            alert("提交成功！\n" + JSON.stringify(answers, null, 2));
+        }
+
+        renderPage();
+    </script>
+</body>
+</html>
