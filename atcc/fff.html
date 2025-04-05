@@ -14,9 +14,8 @@
 </head>
 <body>
     <div class="form container">
-        <div class="title-div">
-            <h1 class="hh">問卷調查</h1>
-            <p class="under">請依序填寫問卷</p>
+        <div class="title-div" id = "title-container">
+            <h1 class="hh">詐騙度測試</h1>
         </div>
         
         <div id="form-container"></div>
@@ -29,25 +28,30 @@
     <script>
         const formData = {
             pages: [
-                ["single_choice", "multiple_choice"],
-                ["text", "dropdown"]
+                ["page_1_question_1", "page_1_question_2","page_1_question_3"],
+                ["page_2_question_1", "page_2_question_2"]
             ],
             questions: {
-                "single_choice": {
-                    "question": "你的最愛的顏色？",
-                    "options": ["紅", "藍", "綠", "黃"],
+                "page_1_question_1": {
+                    "question": "您的性別？",
+                    "options": ["男", "女", "多元性別", "不願透漏"],
                     "type": "radio"
                 },
-                "multiple_choice": {
-                    "question": "你喜歡哪些水果？",
-                    "options": ["蘋果", "香蕉", "葡萄", "西瓜"],
-                    "type": "checkbox"
+                "page_1_question_2": {
+                    "question": "年齡",
+                    "options": ["20歲以下", "20-30歲", "30-40歲", "40-50歲","50-60歲","60歲以上"],
+                    "type": "radio"
                 },
-                "text": {
-                    "question": "請輸入你的姓名",
+                "page_1_question_3": {
+                    "question": "電話(抽獎後以簡訊通知)",
                     "type": "text"
                 },
-                "dropdown": {
+                "page_2_question_1": {
+                    "question": "請選擇你的國家",
+                    "options": ["台灣", "美國", "日本", "法國"],
+                    "type": "select"
+                },
+                "page_2_question_2": {
                     "question": "請選擇你的國家",
                     "options": ["台灣", "美國", "日本", "法國"],
                     "type": "select"
@@ -59,19 +63,21 @@
         let answers = {};
 
         function renderPage() {
+
+
             const container = document.getElementById("form-container");
             container.innerHTML = "";
 
             formData.pages[currentPage].forEach(qType => {
                 const questionData = formData.questions[qType];
                 const div = document.createElement("div");
-                div.className = "question name-div";
-                div.innerHTML = `<p class='name'>${questionData.question} <span class='required'>*</span></p>`;
+                div.className = "name-div";
+                div.innerHTML = `<p class='namoe'>${questionData.question} <span class='required'>*</span></p>`;
 
                 if (questionData.type === "radio" || questionData.type === "checkbox") {
                     questionData.options.forEach(option => {
                         div.innerHTML += `
-                            <label>
+                            <label >
                                 <input type="${questionData.type}" name="${qType}" value="${option}"
                                     ${answers[qType]?.includes(option) ? "checked" : ""}>
                                 ${option}
@@ -84,7 +90,7 @@
                     ).join("");
                     div.innerHTML += `<select name="${qType}">${optionsHtml}</select>`;
                 } else {
-                    div.innerHTML += `<input type="text" name="${qType}" class="input-div" value="${answers[qType] || ""}">`;
+                    div.innerHTML += `<div class = "input-div"><input type="text" name="${qType}" value="${answers[qType] || ""}"></div>`;
                 }
 
                 container.appendChild(div);
